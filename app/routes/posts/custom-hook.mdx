@@ -1,0 +1,199 @@
+---
+title: React カスタムフックの作り方ガイド
+---
+
+# React カスタムフックの作り方ガイド
+
+## はじめに
+
+React のカスタムフックは、コンポーネント間でロジックを再利用するための強力な機能です。この記事では、実践的なカスタムフックの作成方法を学びます。
+
+## カスタムフックとは
+
+カスタムフックは、`use`で始まる名前を持つ JavaScript 関数で、他のフックを呼び出すことができます。コンポーネント間でステートフルなロジックを共有する際に便利です。
+
+### 基本ルール
+
+- 関数名は必ず`use`で始める
+- React の既存フック(useState、useEffect など)を内部で使用できる
+- コンポーネントやフック内でのみ呼び出す
+
+## 実践例 1: useLocalStorage
+
+ローカルストレージを扱うカスタムフックの例です。
+
+```typescript
+import { useState, useEffect } from "react";
+
+function useLocalStorage<T>(key: string, initialValue: T) {
+  // ステートの初期化
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(error);
+      return initialValue;
+    }
+  });
+
+  // 値の更新
+  const setValue = (value: T | ((val: T) => T)) => {
+    try {
+      const valueToStore =
+        value instanceof Function ? value(storedValue) : value;
+      setStoredValue(valueToStore);
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return [storedValue, setValue] as const;
+}
+
+// 使用例
+function App() {
+  const [name, setName] = useLocalStorage<string>("name", "");
+
+  return (
+    <input
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      placeholder='名前を入力'
+    />
+  );
+}
+```
+
+## 実践例 2: useFetch
+
+API からデータを取得するカスタムフックです。
+
+```typescript
+import { useState, useEffect } from "react";
+
+interface FetchState<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+}
+
+function useFetch<T>(url: string): FetchState<T> {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("データの取得に失敗しました");
+        }
+        const result = await response.json();
+        setData(result);
+        setError(null);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [url]);
+
+  return { data, loading, error };
+}
+
+// 使用例
+function UserList() {
+  const { data, loading, error } = useFetch<User[]>("/api/users");
+
+  if (loading) return <div>読み込み中...</div>;
+  if (error) return <div>エラー: {error.message}</div>;
+
+  return (
+    <ul>
+      {data?.map((user) => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## 実践例 3: useDebounce
+
+入力値の遅延処理を行うカスタムフックです。検索機能などで便利です。
+
+```typescript
+import { useState, useEffect } from "react";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+// 使用例
+function SearchBox() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      // API呼び出しなど
+      console.log("検索:", debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm]);
+
+  return (
+    <input
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder='検索...'
+    />
+  );
+}
+```
+
+## カスタムフックのメリット
+
+1. **再利用性**: 同じロジックを複数のコンポーネントで使用できる
+2. **可読性**: コンポーネントのコードがシンプルになる
+3. **テストしやすさ**: ロジックを独立してテストできる
+4. **保守性**: ロジックが一箇所に集約される
+
+## ベストプラクティス
+
+- **単一責任の原則**: 1 つのフックは 1 つの責任を持つ
+- **命名規則を守る**: 必ず`use`で始める
+- **型安全性**: TypeScript のジェネリクスを活用する
+- **依存配列に注意**: useEffect の依存配列を正しく設定する
+- **クリーンアップ**: 必要に応じてクリーンアップ関数を返す
+
+## まとめ
+
+カスタムフックは、React アプリケーションのコードを整理し、ロジックを再利用するための強力なツールです。適切に使用することで、より保守しやすく、テストしやすいコードを書くことができます。
+
+## 参考文献
+
+- [React 公式ドキュメント - カスタムフックの作成](https://ja.react.dev/learn/reusing-logic-with-custom-hooks)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [usehooks-ts - TypeScript 対応カスタムフックコレクション](https://usehooks-ts.com/)
+- [React Hooks API Reference](https://ja.react.dev/reference/react)
+
+---
