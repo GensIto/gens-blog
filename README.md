@@ -35,6 +35,9 @@ npm run preview
 
 # Cloudflare Workersへデプロイ
 npm run deploy
+
+# MDXファイルをCloudflare R2にアップロード
+npm run upload-mdx
 ```
 
 ## プロジェクト構成
@@ -96,6 +99,41 @@ date: "2025-11-17"
 
 本文をここに書く...
 ```
+
+## MDXファイルのR2へのアップロード
+
+Cloudflare R2にMDXファイルをアップロードするスクリプトが用意されています。
+
+### セットアップ
+
+1. `.env.example`をコピーして`.env`を作成
+
+```bash
+cp .env.example .env
+```
+
+2. Cloudflare R2 APIトークンを取得
+   - [Cloudflare Dashboard](https://dash.cloudflare.com/) → R2 → Manage R2 API Tokens
+   - 新しいAPIトークンを作成し、Access Key IDとSecret Access Keyを取得
+
+3. `.env`ファイルにAPIトークンを設定
+
+```env
+R2_ACCESS_KEY_ID=your_actual_access_key_id
+R2_SECRET_ACCESS_KEY=your_actual_secret_access_key
+```
+
+### アップロード実行
+
+```bash
+# 環境変数を設定してアップロード実行
+R2_ACCESS_KEY_ID=xxx R2_SECRET_ACCESS_KEY=xxx npm run upload-mdx
+```
+
+スクリプトの特徴：
+- `app/routes/posts/`内のすべての`.mdx`ファイルを再帰的に検索
+- 既にR2にアップロード済みのファイルは自動的にスキップ
+- アップロード結果の詳細なサマリーを表示
 
 ## AI要約機能
 
