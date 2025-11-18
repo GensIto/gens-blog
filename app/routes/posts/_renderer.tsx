@@ -21,7 +21,8 @@ export default jsxRenderer(({ children }) => {
         <Link href='/app/style.css' rel='stylesheet' />
         <Script src='/app/client.ts' async />
       </head>
-      <body class='bg-gray-900 min-h-screen'>
+      <body class='bg-gray-900 min-h-screen p-4'>
+        <a href='/'>Back to Home</a>
         <article class='prose prose-lg mx-auto p-4 relative'>
           {children}
           <Summarize text={articleText} />
