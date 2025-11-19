@@ -1,4 +1,4 @@
-import { ReactNode } from "hono/jsx";
+import { Child, FC } from "hono/jsx";
 
 type TooltipPosition =
   | "tooltip-top"
@@ -15,7 +15,17 @@ type TooltipColor =
   | "tooltip-warning"
   | "tooltip-error";
 
-export const Tooltip = ({
+type TooltipProps = {
+  children: Child;
+  tip: string;
+  position?: TooltipPosition;
+  color?: TooltipColor;
+  open?: boolean;
+  responsive?: boolean;
+  className?: string;
+};
+
+export const Tooltip: FC<TooltipProps> = ({
   children,
   tip,
   position = "tooltip-top",
@@ -23,14 +33,6 @@ export const Tooltip = ({
   open,
   responsive,
   className,
-}: {
-  children: ReactNode;
-  tip: string;
-  position?: TooltipPosition;
-  color?: TooltipColor;
-  open?: boolean;
-  responsive?: boolean;
-  className?: string;
 }) => {
   const classes = [
     "tooltip",
