@@ -1,0 +1,95 @@
+---
+title: D1にトランザクションがない
+date: 2025-11-24
+description: D1にトランザクションがない。batch機能が提供されているのでそれを使う。
+---
+
+# D1 にトランザクションがない
+
+個人開発している時に、トランザクションを実装する必要があったのだがいざ実装しようとしたらトランザクションがないことに気づいた。
+
+```
+_DrizzleQueryError: Failed query: begin
+params:
+    at D1PreparedQuery.queryWithCache (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/chunk-JJEOLI5G.js:3389:15)
+    at D1PreparedQuery.run (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/drizzle-orm_d1.js:135:12)
+    ... 5 lines matching cause stack trace ...
+    at dispatch (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/hono.js:37:17)
+    at dispatch (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/hono.js:37:17)
+    at dispatch (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/hono.js:37:17) {
+  query: 'begin',
+  params: [],
+  cause: Error: D1_ERROR: To execute a transaction, please use the state.storage.transaction() or state.storage.transactionSync() APIs instead of the SQL BEGIN TRANSACTION or SAVEPOINT statements. The JavaScript API is safer because it will automatically roll back on exceptions, and because it interacts correctly with Durable Objects' automatic atomic write coalescing.
+      at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:125:19)
+      at D1PreparedStatement.run (cloudflare-internal:d1-api:307:29)
+      ... 7 lines matching cause stack trace ...
+      at dispatch (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/hono.js:37:17) {
+    [cause]: Error: To execute a transaction, please use the state.storage.transaction() or state.storage.transactionSync() APIs instead of the SQL BEGIN TRANSACTION or SAVEPOINT statements. The JavaScript API is safer because it will automatically roll back on exceptions, and because it interacts correctly with Durable Objects' automatic atomic write coalescing.
+        at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:126:24)
+        at D1PreparedStatement.run (cloudflare-internal:d1-api:307:29)
+        at D1PreparedQuery.queryWithCache (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/chunk-JJEOLI5G.js:3387:16)
+        at D1PreparedQuery.run (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/drizzle-orm_d1.js:135:12)
+        at SQLiteD1Session.transaction (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/drizzle-orm_d1.js:81:5)
+        at WorkspaceService.createWorkspace (/Users/gens/workspace/project/torello-full-stack-clone/src/worker/service/WorkspaceService.ts:26:12)
+        at /Users/gens/workspace/project/torello-full-stack-clone/src/worker/controllers/WorkspaceController.ts:37:25
+        at dispatch (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/hono.js:37:17)
+        at /Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/@hono_zod-validator.js:172:5
+        at dispatch (/Users/gens/workspace/project/torello-full-stack-clone/node_modules/.vite/deps_torello_full_stack_clone/hono.js:37:17)
+  }
+}
+```
+
+どうやら Sqlite にはトランザクション機能がないみたい?となったので調べてみた
+[microsoft の docs](https://learn.microsoft.com/ja-jp/dotnet/standard/data/sqlite/transactions)を確認すると
+
+> SQLite では、データベース内で一度に 1 つのトランザクションに変更を保留することが許可されます。
+
+とあるのでどうやら Sqlite にはトランザクション機能はあるみたいだが、[D1](https://github.com/cloudflare/workers-sdk/issues/2733)にはないようだ。
+[公式ドキュメント](https://developers.cloudflare.com/d1/worker-api/d1-database/)を確認すると
+
+> Batched statements are SQL transactions. If a statement in the sequence fails, then an error is returned for that specific statement, and it aborts or rolls back the entire sequence.
+
+とあるので、batch 機能で代替えできるみたい
+参考記事:
+
+- [Cloudflare d1 + Prisma をやめて Drizzle orm に移行した](https://noh.ink/articles/Ttbwg2gbzc9Sczn0kzJG)
+- [Cloudflare D1 でトランザクションが使えない問題](https://zenn.dev/minamiso/articles/885adef7098ebe)
+
+# batch 機能を使ってトランザクションを実装する
+
+batch 機能を使ってトランザクションを実装する。
+
+```typescript
+async createWorkspace(workspace: Workspace): Promise<Workspace> {
+    const membership = WorkspaceMembership.createOwnerMembership(
+      workspace.workspaceId,
+      workspace.ownerUserId
+    );
+
+    const results = await this.db.batch([
+      this.workspaceRepository.createBuilder(workspace),
+      this.workspaceMemberships.createBuilder(membership),
+    ]);
+
+    const createdWorkspaceResult = results[0];
+    if (!createdWorkspaceResult || createdWorkspaceResult.length === 0) {
+      throw new Error("Failed to create workspace");
+    }
+
+    const createdWorkspace = createdWorkspaceResult[0];
+    return Workspace.of(
+      WorkspaceId.of(createdWorkspace.workspaceId),
+      WorkspaceName.of(createdWorkspace.name),
+      UserId.of(createdWorkspace.ownerUserId)
+    );
+  }
+```
+
+batch には、`createBuilder`メソッドを使ってビルダーを作成する。
+なんというか純粋な SQL じゃないとダメみたい
+
+```typescript
+createBuilder(workspace: Workspace) {
+  return this.db.insert(workspaces).values(workspace.toJson()).returning();
+}
+```
