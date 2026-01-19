@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gens-blog",
+  "main": "./dist/index.js",
+  "compatibility_date": "2026-01-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "./dist"
+  },
+  "vars": {
+    "JWT_SECRET": "Ov23liaOZml0b8InWzNn0470584d3693e7028e015406b2165cef1c0c1501GensIto"
+  },
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "gens-blog"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gens-blog",
+      "database_id": "6a688870-cd8e-4a2b-8427-b829fa46f864",
+      "migrations_dir": "./drizzle"
+    }
+  ],
+  "ai": {
+    "binding": "AI"
+  }
+}
