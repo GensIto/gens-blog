@@ -1,0 +1,47 @@
+import { setCookie, deleteCookie, getCookie } from "hono/cookie";
+import { sign, verify } from "hono/jwt";
+import { createApp } from "honox/server";
+import type { Env } from "../../server";
+
+
+export const authController = createApp<Env>().post('/login', async (c) => {
+  const { username, password } = await c.req.json<{ username: string; password: string }>()
+
+  const { JWT_SECRET } = c.env
+
+
+  const payload = {
+    sub: {
+      username,
+      password,
+    },
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+  }
+  const token = await sign(payload, JWT_SECRET)
+
+  setCookie(c, 'auth_token', token, {
+    path: '/',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'Lax',
+    maxAge: 60 * 60 * 24 * 7,
+  })
+
+  return c.json({ success: true })
+}).get('/logout', (c) => {
+  deleteCookie(c, 'auth_token', { path: '/' })
+  return c.redirect('/')
+}).get('/me', async (c) => {
+  const token = getCookie(c, 'auth_token')
+  if (!token) {
+    return c.json({ authenticated: false }, 401)
+  }
+
+  try {
+    const payload = await verify(token, c.env.JWT_SECRET, 'HS256')
+    return c.json({ authenticated: true, user: payload.sub })
+  } catch {
+    deleteCookie(c, 'auth_token', { path: '/' })
+    return c.json({ authenticated: false }, 401)
+  }
+})
