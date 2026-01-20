@@ -13,14 +13,12 @@ export const authController = createApp<Env>().post('/login', async (c) => {
   const { JWT_SECRET, DB } = c.env
   const db = createDb(DB)
 
-  // DBからadminユーザーを検索
   const user = await db.select().from(admin).where(eq(admin.email, email)).get()
 
   if (!user) {
     return c.json({ success: false as const, error: 'メールアドレスまたはパスワードが正しくありません' }, 401)
   }
 
-  // パスワード検証（本番ではbcryptなどでハッシュ比較を推奨）
   if (user.password !== password) {
     return c.json({ success: false as const, error: 'メールアドレスまたはパスワードが正しくありません' }, 401)
   }
@@ -30,7 +28,7 @@ export const authController = createApp<Env>().post('/login', async (c) => {
       id: user.id,
       email: user.email,
     },
-    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 1, // z1 day
   }
   const token = await sign(payload, JWT_SECRET)
 
@@ -39,7 +37,7 @@ export const authController = createApp<Env>().post('/login', async (c) => {
     httpOnly: true,
     secure: true,
     sameSite: 'Lax',
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * 1, // 1 day
   })
 
   return c.json({ success: true as const })
