@@ -37,15 +37,15 @@ export default createRoute((c) => {
         </div>
 
         <h1 class="font-['Noto_Serif_JP'] font-medium text-5xl text-stone-900 leading-tight tracking-[0.96px] mb-6">
-          静謐なる思考
+          間の設計
         </h1>
 
         <p class="font-['Noto_Serif_JP'] text-base text-stone-500 leading-8 tracking-[0.32px] mb-2">
-          ソフトウェアエンジニアリングの深淵を探る
+          余白が、道をひらく
         </p>
 
         <p class="font-['Noto_Serif_JP'] text-base text-stone-500 leading-8 tracking-[0.32px] mb-10">
-          コードと思想の記録
+          整えることの記録
         </p>
 
         <a

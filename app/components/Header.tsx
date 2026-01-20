@@ -9,7 +9,6 @@ type NavItem = {
 const navItems: NavItem[] = [
   { label: '記録', href: '/blog' },
   { label: '経歴', href: '/resume' },
-  { label: '技術', href: '/skills' },
   { label: '管理', href: '/admin' },
 ]
 
