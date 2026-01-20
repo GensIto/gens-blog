@@ -1,19 +1,34 @@
 import { setCookie, deleteCookie, getCookie } from "hono/cookie";
 import { sign, verify } from "hono/jwt";
 import { createApp } from "honox/server";
+import { eq } from "drizzle-orm";
 import type { Env } from "../../server";
+import { createDb } from "../../db";
+import { admin } from "../../db/schema";
 
 
 export const authController = createApp<Env>().post('/login', async (c) => {
-  const { username, password } = await c.req.json<{ username: string; password: string }>()
+  const { email, password } = await c.req.json<{ email: string; password: string }>()
 
-  const { JWT_SECRET } = c.env
+  const { JWT_SECRET, DB } = c.env
+  const db = createDb(DB)
 
+  // DBからadminユーザーを検索
+  const user = await db.select().from(admin).where(eq(admin.email, email)).get()
+
+  if (!user) {
+    return c.json({ success: false as const, error: 'メールアドレスまたはパスワードが正しくありません' }, 401)
+  }
+
+  // パスワード検証（本番ではbcryptなどでハッシュ比較を推奨）
+  if (user.password !== password) {
+    return c.json({ success: false as const, error: 'メールアドレスまたはパスワードが正しくありません' }, 401)
+  }
 
   const payload = {
     sub: {
-      username,
-      password,
+      id: user.id,
+      email: user.email,
     },
     exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
   }
@@ -27,7 +42,7 @@ export const authController = createApp<Env>().post('/login', async (c) => {
     maxAge: 60 * 60 * 24 * 7,
   })
 
-  return c.json({ success: true })
+  return c.json({ success: true as const })
 }).get('/logout', (c) => {
   deleteCookie(c, 'auth_token', { path: '/' })
   return c.redirect('/')

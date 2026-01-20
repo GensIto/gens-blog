@@ -1,12 +1,13 @@
+import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const admin = sqliteTable("admin", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: text("createdAt")
     .notNull()
-    .$defaultFn(() => new Date()),
+    .default(sql`(datetime('now'))`),
 });
 
 export const blogs = sqliteTable("blogs", {
@@ -14,12 +15,12 @@ export const blogs = sqliteTable("blogs", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   published: integer("published", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: text("createdAt")
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  updatedAt: text("updatedAt")
+      .notNull()
+      .default(sql`(datetime('now'))`),
 });
 
 export const blogTags = sqliteTable("blog_tags", {
@@ -31,10 +32,10 @@ export const blogTags = sqliteTable("blog_tags", {
 export const tags = sqliteTable("tags", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: text("createdAt")
     .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updatedAt")
     .notNull()
-    .$defaultFn(() => new Date()),
+    .default(sql`(datetime('now'))`),
 });

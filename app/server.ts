@@ -5,6 +5,7 @@ import { authController } from './server/auth/controllers'
 export type Env = {
   Bindings: {
     JWT_SECRET: string
+    DB: D1Database
   }
   Variables: {}
 }

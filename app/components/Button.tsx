@@ -8,6 +8,7 @@ type BaseProps = {
 type ButtonProps = PropsWithChildren<
   BaseProps & {
     type?: 'button' | 'submit'
+    disabled?: boolean
   }
 >
 
@@ -38,9 +39,10 @@ export const Button: FC<ButtonProps> = ({
   variant = 'outline',
   type = 'button',
   class: className = '',
+  disabled = false,
 }) => {
   return (
-    <button type={type} class={getButtonClasses(variant, className)}>
+    <button type={type} class={getButtonClasses(variant, className)} disabled={disabled}>
       {children}
     </button>
   )
