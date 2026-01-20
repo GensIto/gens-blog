@@ -3,24 +3,53 @@ import { EnsoCircle } from '../../components/EnsoCircle'
 import { PageHeading } from '../../components/PageHeading'
 import { SectionHeading } from '../../components/SectionHeading'
 import { TimelineItem } from '../../components/TimelineItem'
-import { Button } from '../../components/Button'
-import { MailIcon } from '../../components/Icons'
+import { LinkButton } from '../../components/Button'
 
 const workHistory = [
   {
-    period: '2024 - 現在',
-    company: '株式会社◯◯',
-    role: 'Backend Engineer',
+    period: '2025年10月 - 現在',
+    company: '株式会社パブリックテクノロジーズ',
+    role: 'フルスタックエンジニア',
+    skills: ['Next.js', 'tRPC', 'Prisma', 'TypeScript'],
     description:
-      '顧客情報管理のための SaaS の開発。Cloudflare Workers、tRPC、Drizzle ORM のシステムを導入したプロダクト開発をリード。',
+      'AI行政というプロダクトでフルスタックエンジニアとして開発を担当。',
+      achievements: [
+        'Next.js + tRPC + Prisma を用いたフルスタック開発。RAGデータベース構築のためのファイルアップロード時のメタ情報入力負担を軽減するAI推論機能の実装を担当',
+      ],
   },
   {
-    period: '2019 - 2024',
-    company: '株式会社△△',
-    role: 'Frontend Engineer',
+    period: '2023年1月 - 2025年9月',
+    company: 'アイリス株式会社',
+    role: 'フロントエンドエンジニア',
+    skills: ['React', 'TypeScript', 'Next.js', 'Storybook', 'Jest', "Figma"],
     description:
-      'React/TypeScript を用いた Web アプリケーション開発。デザインシステムの構築とコンポーネント設計を担当。',
+      '咽頭画像を撮影するハードのカメラと問診を入力するWebアプリとAI判定を組み合わせた医療機器のフロントエンド開発を担当。',
+    achievements: [
+      'フロントエンドチームの品質担保について社内発表し、活動を広める',
+      'Next.js 勉強会を提案・開催。デイリーでチュートリアルを進め、毎週水曜日に共有する形式を構築',
+      'メディアサイト新規事業のプロトタイプを Next.js + Supabase で作成し社内に提案',
+      '外部 Web 問診サービス連携のプロトタイプを作成し、リリースまで推進',
+    ],
   },
+  {
+    period: '2021年10月 - 2022年12月',
+    company: '合同会社ATE UNIVERSE',
+    role: 'Webコーダー',
+    skills: ['HTML', 'CSS', 'JavaScript', 'WordPress', 'FLOCSS', "React", "TailwindCSS"],
+    description:
+      '前任者との入れ替わりで未経験から1人でスタート。Web事業の売り上げを落とすことなく、自走力を身につけた。',
+    achievements: [
+      'FLOCSS を用いた CSS 設計',
+      'Gulp で構築していた季節ごとの LP を React + TypeScript + TailwindCSS に移行し、コンポーネント化・再利用可能な形に改善',
+      'Next.js + microCMS で Headless CMS（Jamstack）を提案',
+    ],
+  },
+]
+
+const contactLinks = [
+  { label: 'Wantedly', href: 'https://www.wantedly.com/id/gens' },
+  { label: 'GitHub', href: 'https://github.com/GensIto' },
+  { label: 'X', href: 'https://x.com/g67715570' },
 ]
 
 export default createRoute((c) => {
@@ -36,26 +65,25 @@ export default createRoute((c) => {
         </div>
 
         <h2 class="font-['Noto_Serif_JP'] font-medium text-2xl text-stone-900 leading-8 mb-4">
-          Your Name
+          伊藤 源太
         </h2>
 
         <p class="font-['Noto_Sans_JP'] text-sm text-stone-400 tracking-[2.1px] mb-6">
-          Backend Engineer
+          フロントエンドエンジニア
         </p>
 
         <div class="max-w-[672px] space-y-4">
-          <p class="font-['Noto_Serif_JP'] text-base text-stone-900 leading-8 tracking-[0.32px]">
-            ソフトウェアエンジニア。静謐なコードを追求する。
+          <p class="font-['Noto_Serif_JP'] text-base text-stone-900 leading-8 tracking-[0.32px] text-left">
+            ワクワクそしてドキドキ
           </p>
 
-          <p class="font-['Noto_Serif_JP'] text-base text-stone-900 leading-8 tracking-[0.32px]">
-            Clean Architecture と Domain-Driven Design
-            を軸に、持続可能なシステム設計を探求している。エッジコンピューティングと TypeScript
-            の深淵に魅せられ、日々コードと対話する。
+          <p class="font-['Noto_Serif_JP'] text-base text-stone-900 leading-8 tracking-[0.32px] text-left">
+            Web コーダーからスタートし、現在はソフトウェアエンジニアとして、React、TypeScript
+            を軸に、開発しています。
           </p>
 
-          <p class="font-['Noto_Serif_JP'] text-base text-stone-900 leading-8 tracking-[0.32px]">
-            「簡潔さの中にすべての本質が見える」という禅の教えを、ソフトウェア設計に応用することを目指している。
+          <p class="font-['Noto_Serif_JP'] text-base text-stone-900 leading-8 tracking-[0.32px] text-left">
+            プロダクトエンジニアとして、幅広い領域で活躍し、事業を成長させられるエンジニアを目指しています。
           </p>
         </div>
       </section>
@@ -69,11 +97,13 @@ export default createRoute((c) => {
         <div class="space-y-12">
           {workHistory.map((item) => (
             <TimelineItem
-              key={item.period}
+              key={item.company}
               period={item.period}
               company={item.company}
               role={item.role}
+              skills={item.skills}
               description={item.description}
+              achievements={item.achievements}
             />
           ))}
         </div>
@@ -91,11 +121,11 @@ export default createRoute((c) => {
           </p>
 
           <div class="flex items-center justify-center gap-6">
-            <Button href="mailto:contact@example.com">
-              <MailIcon size={16} />
-              メール
-            </Button>
-            <Button href="https://github.com">GitHub</Button>
+            {contactLinks.map((link) => (
+              <LinkButton key={link.label} href={link.href} target='_blank'>
+                {link.label}
+              </LinkButton>
+            ))}
           </div>
         </div>
       </section>

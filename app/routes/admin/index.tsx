@@ -1,7 +1,7 @@
 import { createRoute } from 'honox/factory'
 import { PageHeading } from '../../components/PageHeading'
 import { BlogTable } from '../../components/BlogTable'
-import { Button } from '../../components/Button'
+import { LinkButton } from '../../components/Button'
 import { PlusIcon } from '../../components/Icons'
 
 // Mock data - replace with actual database query
@@ -47,10 +47,10 @@ export default createRoute((c) => {
           <h1 class="font-['Noto_Serif_JP'] font-medium text-3xl text-stone-900 leading-9">管理</h1>
           <p class="mt-3 font-['Noto_Sans_JP'] text-sm text-stone-400 tracking-[2.1px]">記録一覧</p>
         </div>
-        <Button href="/admin/new">
+        <LinkButton href="/admin/new" target="_self">
           <PlusIcon size={16} />
           新規作成
-        </Button>
+        </LinkButton>
       </div>
 
       {/* Blog Table */}
