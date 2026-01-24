@@ -1,38 +1,39 @@
-import { useState } from "hono/jsx"
+import { useState, useTransition } from "hono/jsx"
 import { hc } from "hono/client"
 import type { App } from "../server"
-import { Input, Button } from "../components"
+import { Input, Button, EnsoCircle } from "../components"
 
 const client = hc<App>('/')
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = async (e: Event) => {
+  const handleSubmit = (e: Event) => {
     e.preventDefault()
-    setError('')
-    setIsLoading(true)
+    const formData = new FormData(e.target as HTMLFormElement)
 
-    try {
-      const response = await client.api.auth.login.$post({
-        json: { email, password },
-      })
+    startTransition(async () => {
+      setError('')
+      try {
+        const response = await client.api.auth.login.$post({
+          json: {
+            email: formData.get('email') as string,
+            password: formData.get('password') as string,
+          },
+        })
 
-      const data = await response.json()
+        const data = await response.json()
 
-      if (response.ok && data.success) {
-        window.location.href = '/admin/top'
-      } else if (!data.success) {
-        setError(data.error || 'ログインに失敗しました')
+        if (response.ok && data.success) {
+          window.location.href = '/admin/top'
+        } else if (!data.success) {
+          setError(data.error || 'ログインに失敗しました')
+        }
+      } catch {
+        setError('通信エラーが発生しました')
       }
-    } catch {
-      setError('通信エラーが発生しました')
-    } finally {
-      setIsLoading(false)
-    }
+    })
   }
 
   return (
@@ -42,24 +43,23 @@ export default function LoginForm() {
           {error}
         </div>
       )}
+      <div class="flex justify-center">
+        <EnsoCircle size={64} />
+      </div>
       <div class="space-y-4">
         <Input
           label="メールアドレス"
           name="email"
           type="email"
-          value={email}
-          onInput={(e: Event) => setEmail((e.target as HTMLInputElement).value)}
         />
         <Input
           label="パスワード"
           name="password"
           type="password"
-          value={password}
-          onInput={(e: Event) => setPassword((e.target as HTMLInputElement).value)}
         />
       </div>
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? 'ログイン中...' : 'ログイン'}
+      <Button class="w-full" type="submit" disabled={isPending}>
+        {isPending ? 'ログイン中...' : 'ログイン'}
       </Button>
     </form>
   )

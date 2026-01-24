@@ -1,4 +1,7 @@
-import { useState } from 'hono/jsx'
+import { useState, useTransition, useEffect } from 'hono/jsx'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+import { Modal } from '../components'
 
 type BlogFormData = {
   id?: string
@@ -10,64 +13,93 @@ type BlogFormData = {
   createdAt: string
 }
 
+function MarkdownPreview({ content }: { content: string }) {
+  const [html, setHtml] = useState('')
+
+  useEffect(() => {
+    async function renderMarkdown() {
+      const rendered = await marked.parse(content)
+      setHtml(DOMPurify.sanitize(rendered))
+    }
+    renderMarkdown()
+  }, [content])
+
+  return (
+    <article class="prose prose-stone prose-lg max-w-none">
+      <div
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </article>
+  )
+}
+
 type BlogEditFormProps = {
   initialData?: BlogFormData
 }
 
+const defaultData: BlogFormData = {
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  status: 'draft',
+  createdAt: new Date().toISOString().split('T')[0],
+}
+
 export default function BlogEditForm({ initialData }: BlogEditFormProps) {
-  const [formData, setFormData] = useState<BlogFormData>(
-    initialData ?? {
-      title: '',
-      slug: '',
-      excerpt: '',
-      content: '',
-      status: 'draft',
-      createdAt: new Date().toISOString().split('T')[0],
-    }
-  )
+  const [isPending, startTransition] = useTransition()
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [previewContent, setPreviewContent] = useState({ title: '', content: '' })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const handlePreviewClick = (e: Event) => {
+    e.preventDefault()
+    const form = (e.target as HTMLElement).closest('form')
+    if (!form) return
 
-  const handleChange = (
-    e: Event & { currentTarget: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement }
-  ) => {
-    const { name, value } = e.currentTarget
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const formData = new FormData(form)
+    setPreviewContent({
+      title: (formData.get('title') as string) || '(無題)',
+      content: formData.get('content') as string
+    })
+    setIsPreviewOpen(true)
   }
 
-  const handleSubmit = async (e: Event, action: 'preview' | 'publish') => {
+  const handleSubmit = (e: Event) => {
     e.preventDefault()
-    setIsSubmitting(true)
+    const formData = new FormData(e.target as HTMLFormElement)
 
-    try {
-      const endpoint = initialData?.id ? `/api/blogs/${initialData.id}` : '/api/blogs'
-      const method = initialData?.id ? 'PUT' : 'POST'
+    startTransition(async () => {
+      try {
+        const endpoint = initialData?.id ? `/api/blogs/${initialData.id}` : '/api/blogs'
+        const method = initialData?.id ? 'PUT' : 'POST'
+        const status = 'published'
 
-      const response = await fetch(endpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          status: action === 'publish' ? 'published' : formData.status,
-        }),
-      })
+        const response = await fetch(endpoint, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: formData.get('title'),
+            slug: formData.get('slug'),
+            excerpt: formData.get('excerpt'),
+            content: formData.get('content'),
+            status,
+            createdAt: formData.get('createdAt'),
+          }),
+        })
 
-      if (response.ok) {
-        if (action === 'preview') {
-          window.open(`/blog/${formData.slug}?preview=true`, '_blank')
-        } else {
+        if (response.ok) {
           window.location.href = '/admin'
         }
+      } catch (error) {
+        console.error('Error saving blog:', error)
       }
-    } catch (error) {
-      console.error('Error saving blog:', error)
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
+  const data = initialData ?? defaultData
+
   return (
-    <form class="flex flex-col gap-8">
+    <form onSubmit={handleSubmit} class="flex flex-col gap-8">
       {/* Title */}
       <div class="flex flex-col gap-3">
         <label
@@ -80,8 +112,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
           type="text"
           id="title"
           name="title"
-          value={formData.title}
-          onInput={handleChange}
+          defaultValue={data.title}
           required
           class="w-full px-4 py-3 bg-white border border-stone-200 font-['Noto_Serif_JP'] text-base text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#7a9a7a] transition-colors"
         />
@@ -101,8 +132,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
             type="text"
             id="slug"
             name="slug"
-            value={formData.slug}
-            onInput={handleChange}
+            defaultValue={data.slug}
             required
             class="flex-1 px-4 py-3 bg-white border border-stone-200 font-['Inter'] text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#7a9a7a] transition-colors"
           />
@@ -120,8 +150,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
         <textarea
           id="excerpt"
           name="excerpt"
-          value={formData.excerpt}
-          onInput={handleChange}
+          defaultValue={data.excerpt}
           rows={3}
           class="w-full px-4 py-3 bg-white border border-stone-200 font-['Noto_Serif_JP'] text-base text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#7a9a7a] transition-colors resize-none"
         />
@@ -138,8 +167,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
         <textarea
           id="content"
           name="content"
-          value={formData.content}
-          onInput={handleChange}
+          defaultValue={data.content}
           rows={16}
           class="w-full px-4 py-3 bg-white border border-stone-200 font-['Inter'] text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#7a9a7a] transition-colors resize-none font-mono"
         />
@@ -158,8 +186,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
             type="date"
             id="createdAt"
             name="createdAt"
-            value={formData.createdAt}
-            onInput={handleChange}
+            defaultValue={data.createdAt}
             class="w-full px-4 py-3 bg-white border border-stone-200 font-['Noto_Sans_JP'] text-base text-stone-900 focus:outline-none focus:border-[#7a9a7a] transition-colors"
           />
         </div>
@@ -173,8 +200,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
           <select
             id="status"
             name="status"
-            value={formData.status}
-            onChange={handleChange}
+            defaultValue={data.status}
             class="w-full px-4 py-3 bg-white border border-stone-200 font-['Noto_Sans_JP'] text-base text-stone-900 focus:outline-none focus:border-[#7a9a7a] transition-colors appearance-none cursor-pointer"
           >
             <option value="draft">下書き</option>
@@ -187,8 +213,8 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
       <div class="flex gap-4 pt-4">
         <button
           type="button"
-          onClick={(e) => handleSubmit(e, 'preview')}
-          disabled={isSubmitting}
+          onClick={handlePreviewClick}
+          disabled={isPending}
           class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-transparent border border-stone-900 text-stone-900 font-['Noto_Sans_JP'] font-medium text-sm tracking-[2.1px] hover:bg-stone-100 transition-colors disabled:opacity-50"
         >
           <svg
@@ -208,9 +234,8 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
           プレビュー
         </button>
         <button
-          type="button"
-          onClick={(e) => handleSubmit(e, 'publish')}
-          disabled={isSubmitting}
+          type="submit"
+          disabled={isPending}
           class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-stone-900 border border-stone-900 text-[#f8f6f1] font-['Noto_Sans_JP'] font-medium text-sm tracking-[2.1px] hover:bg-stone-800 transition-colors disabled:opacity-50"
         >
           <svg
@@ -232,6 +257,16 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
           公開する
         </button>
       </div>
+
+      {/* Preview Modal */}
+      <Modal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        title={previewContent.title}
+        maxWidth="2xl"
+      >
+        <MarkdownPreview content={previewContent.content} />
+      </Modal>
     </form>
   )
 }

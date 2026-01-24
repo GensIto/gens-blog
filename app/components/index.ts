@@ -10,6 +10,7 @@ export { ArticleCard } from './ArticleCard'
 export { TimelineItem } from './TimelineItem'
 export { PhilosophyItem } from './PhilosophyItem'
 export { BlogTable } from './BlogTable'
+export { Modal } from './Modal'
 
 // Form Components
 export { Button } from './Button'
@@ -23,4 +24,5 @@ export {
   ArrowRightIcon,
   PlusIcon,
   MailIcon,
+  XIcon,
 } from './Icons'
