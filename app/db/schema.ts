@@ -13,8 +13,10 @@ export const admin = sqliteTable("admin", {
 export const blogs = sqliteTable("blogs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  excerpt: text("excerpt"),
   content: text("content").notNull(),
-  published: integer("published", { mode: "boolean" }).notNull().default(false),
+  status: text("status", { enum: ["draft", "published"] }).notNull().default("draft"),
   createdAt: text("createdAt")
       .notNull()
       .default(sql`(datetime('now'))`),

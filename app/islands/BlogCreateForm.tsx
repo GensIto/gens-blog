@@ -1,19 +1,9 @@
 import { useState, useTransition, useEffect } from 'hono/jsx'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { blogUpdateSchema } from '../schemas/blog'
+import { blogCreateSchema } from '../schemas/blog'
 import { client } from '../lib/client'
 import { Modal } from '../components'
-
-type BlogFormData = {
-  id: string
-  title: string
-  slug: string
-  excerpt: string
-  content: string
-  status: 'draft' | 'published'
-  createdAt: string
-}
 
 function MarkdownPreview({ content }: { content: string }) {
   const [html, setHtml] = useState('')
@@ -35,11 +25,16 @@ function MarkdownPreview({ content }: { content: string }) {
   )
 }
 
-type BlogEditFormProps = {
-  initialData: BlogFormData
+const defaultData = {
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  status: 'draft' as const,
+  createdAt: new Date().toISOString().split('T')[0],
 }
 
-export default function BlogEditForm({ initialData }: BlogEditFormProps) {
+export default function BlogCreateForm() {
   const [isPending, startTransition] = useTransition()
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [previewContent, setPreviewContent] = useState({ title: '', content: '' })
@@ -76,7 +71,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
         }
 
         // Validate with Zod schema
-        const validation = blogUpdateSchema.safeParse(blogData)
+        const validation = blogCreateSchema.safeParse(blogData)
         if (!validation.success) {
           const fieldErrors: Record<string, string> = {}
           validation.error.issues.forEach((issue) => {
@@ -88,17 +83,17 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
           return
         }
 
-        const response = await client.api.blogs[':id'].$put({
+        // Create new blog
+        const response = await client.api.blogs.$post({
           json: blogData,
-          param: { id: initialData.id },
         })
 
-        const result = await response.json()
+        const result = await response.json() as { success: boolean; error?: string }
 
         if (response.ok && result.success) {
           window.location.href = '/admin'
         } else if (!result.success) {
-          setErrors({ _form: result.error || 'ブログの更新に失敗しました' })
+          setErrors({ _form: result.error || 'ブログの作成に失敗しました' })
         }
       } catch (error) {
         setErrors({ _form: '通信エラーが発生しました' })
@@ -127,7 +122,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
           type="text"
           id="title"
           name="title"
-          defaultValue={initialData.title}
+          defaultValue={defaultData.title}
           required
           class={`w-full px-4 py-3 bg-white border font-['Noto_Serif_JP'] text-base text-stone-900 placeholder:text-stone-400 focus:outline-none transition-colors ${
             errors.title
@@ -154,7 +149,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
             type="text"
             id="slug"
             name="slug"
-            defaultValue={initialData.slug}
+            defaultValue={defaultData.slug}
             required
             class={`flex-1 px-4 py-3 bg-white border font-['Inter'] text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none transition-colors ${
               errors.slug
@@ -179,7 +174,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
         <textarea
           id="excerpt"
           name="excerpt"
-          defaultValue={initialData.excerpt}
+          defaultValue={defaultData.excerpt}
           rows={3}
           class="w-full px-4 py-3 bg-white border border-stone-200 font-['Noto_Serif_JP'] text-base text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#7a9a7a] transition-colors resize-none"
         />
@@ -196,9 +191,9 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
         <textarea
           id="content"
           name="content"
-          defaultValue={initialData.content}
+          defaultValue={defaultData.content}
           rows={16}
-          class={`w-full px-4 py-3 bg-white border font-['Inter'] text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none transition-colors resize-none font-mono ${
+          class={`w-full px-4 py-3 bg-white border font-['Inter'] text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none transition-colors resize-none ${
             errors.content
               ? 'border-red-500 focus:border-red-500'
               : 'border-stone-200 focus:border-[#7a9a7a]'
@@ -222,7 +217,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
             type="date"
             id="createdAt"
             name="createdAt"
-            defaultValue={initialData.createdAt}
+            defaultValue={defaultData.createdAt}
             class="w-full px-4 py-3 bg-white border border-stone-200 font-['Noto_Sans_JP'] text-base text-stone-900 focus:outline-none focus:border-[#7a9a7a] transition-colors"
           />
         </div>
@@ -236,7 +231,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
           <select
             id="status"
             name="status"
-            defaultValue={initialData.status}
+            defaultValue={defaultData.status}
             class="w-full px-4 py-3 bg-white border border-stone-200 font-['Noto_Sans_JP'] text-base text-stone-900 focus:outline-none focus:border-[#7a9a7a] transition-colors appearance-none cursor-pointer"
           >
             <option value="draft">下書き</option>
@@ -290,7 +285,7 @@ export default function BlogEditForm({ initialData }: BlogEditFormProps) {
             <path d="M2 2l7.586 7.586" />
             <circle cx="11" cy="11" r="2" />
           </svg>
-          更新する
+          作成する
         </button>
       </div>
 

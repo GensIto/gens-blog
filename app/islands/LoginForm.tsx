@@ -1,9 +1,6 @@
 import { useState, useTransition } from "hono/jsx"
-import { hc } from "hono/client"
-import type { App } from "../server"
+import { client } from "../lib/client"
 import { Input, Button, EnsoCircle } from "../components"
-
-const client = hc<App>('/')
 
 export default function LoginForm() {
   const [error, setError] = useState('')

@@ -15,6 +15,13 @@
       "when": 1768917113809,
       "tag": "0001_colorful_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769316000000,
+      "tag": "0002_add_blog_slug_excerpt_status",
+      "breakpoints": true
     }
   ]
 }
