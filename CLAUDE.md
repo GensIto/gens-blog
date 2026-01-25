@@ -28,8 +28,15 @@ This is a blog application built with HonoX (a full-stack framework based on Hon
 - `bun run db:gen` - Generate Drizzle migration files from schema changes
 - `bun run db:migrate` - Apply migrations to local D1 database
 - `bun run db:migrate:remote` - Apply migrations to production D1 database
-- `bun run db:studio` - Open Drizzle Studio for production database
-- `bun run db:studio:prod` - Alternative studio command for production
+- `bun run db:studio` - Open Drizzle Studio for local database
+- `bun run db:studio:prod` - Open Drizzle Studio for production database
+
+### Code Quality Commands
+
+- `bun run lint` - Run ESLint on codebase
+- `bun run lint:fix` - Run ESLint and auto-fix issues
+- `bun run format` - Format code with Prettier
+- `bun run format:check` - Check code formatting without changes
 
 ## Architecture
 
@@ -59,16 +66,30 @@ The `Env` type defines Cloudflare Workers bindings:
 **Islands** (`app/islands/`):
 
 - Client-side interactive components (islands architecture)
-- Example: `counter.tsx` - Client-side interactive counter component
+- Components that require client-side JavaScript (forms, interactive UI)
+- Examples: `BlogCreateForm.tsx`, `BlogEditForm.tsx`, `LoginForm.tsx`
 - Imported and used within routes for hydration
+
+**Middleware** (`app/middleware/`):
+
+- `dbMiddleware` - Attaches database instance to context (`c.get('db')`)
+- `authMiddleware` - Validates JWT token from cookie, sets user in context
+- Both are type-safe with the `Env` type from `app/server.ts`
+- Chain middleware using `.use()` before route handlers
 
 **API Controllers** (`app/server/`):
 
+Controllers are mounted at `/api` prefix (configured in `app/server.ts`):
+
 - `auth/controllers.ts` - Authentication endpoints using JWT
-  - `POST /api/auth/login` - Login with username/password, sets httpOnly cookie
+  - `POST /api/auth/login` - Login with email/password, sets httpOnly cookie
   - `GET /api/auth/logout` - Clear auth cookie and redirect
   - `GET /api/auth/me` - Verify authentication status
-- Controllers use `createApp<Env>()` and are type-safe
+- `blogs/controllers.ts` - Blog CRUD operations (all protected by `authMiddleware`)
+  - `GET /api/blogs/:id` - Fetch single blog by ID
+  - `POST /api/blogs` - Create new blog (uses Cloudflare AI for auto-generating excerpt)
+  - `PUT /api/blogs/:id` - Update existing blog
+- Controllers use `createApp<Env>()` for type safety and can chain middleware
 
 ### Database Layer
 
@@ -88,11 +109,12 @@ Drizzle schema with four tables:
 
 **Migrations**:
 
-- Generated in `./drizzle` directory
-- Applied via Wrangler CLI commands
+- Generated in `./drizzle` directory via `bun run db:gen`
+- Applied via Wrangler CLI commands (`db:migrate` for local, `db:migrate:remote` for production)
 - Two Drizzle configs:
-  - `drizzle.config.ts` - Production config using D1 HTTP API
-  - `drizzle.config.local.ts` - Local dev config using Wrangler's local SQLite file
+  - `drizzle.config.ts` - Production config using D1 HTTP API (requires `.env` credentials)
+  - `drizzle.config.local.ts` - Local dev config pointing to Wrangler's SQLite file in `.wrangler/state/v3/d1/`
+- Use `db:studio` with local config or `db:studio:prod` with production config
 
 ### Build Configuration
 
@@ -119,10 +141,10 @@ To modify the database schema:
 3. Run `bun run db:migrate` for local or `bun run db:migrate:remote` for production
 4. Restart dev server to pick up changes
 
-When querying in routes/controllers:
+**In Routes** - create database instance directly:
 
 ```typescript
-import { createDb } from '../db'
+import { createDb, schema } from '../db'
 
 export default createRoute(async (c) => {
   const db = createDb(c.env.DB)
@@ -131,15 +153,41 @@ export default createRoute(async (c) => {
 })
 ```
 
+**In Controllers** - use `dbMiddleware` to get database from context:
+
+```typescript
+export const blogController = createApp<Env>()
+  .use(dbMiddleware)
+  .get('/:id', async (c) => {
+    const db = c.get('db')  // Database instance from middleware
+    const id = c.req.param('id')
+    const result = await db.select().from(blogs).where(eq(blogs.id, Number(id)))
+    // ...
+  })
+```
+
 ## Authentication Pattern
 
-The auth system uses JWT tokens stored in httpOnly cookies. To protect routes:
+The auth system uses JWT tokens stored in httpOnly cookies:
+
+**For API Controllers** - use the `authMiddleware`:
+
+```typescript
+export const blogController = createApp<Env>()
+  .use(dbMiddleware)
+  .post('/', authMiddleware, async (c) => {
+    const user = c.get('user')  // JWT payload if authenticated
+    // ... protected route logic
+  })
+```
+
+**For Manual Auth Checks**:
 
 1. Get token from cookie: `getCookie(c, 'auth_token')`
 2. Verify with `verify(token, c.env.JWT_SECRET, 'HS256')`
 3. Handle invalid tokens by clearing cookie and returning 401
 
-Refer to `app/server/auth/controllers.ts` for the full pattern.
+Refer to `app/middleware/auth.ts` and `app/server/auth/controllers.ts` for implementation details.
 
 ## Deployment
 
