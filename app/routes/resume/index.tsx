@@ -1,66 +1,30 @@
 import { createRoute } from 'honox/factory'
+import { asc } from 'drizzle-orm'
 import { EnsoCircle } from '../../components/EnsoCircle'
 import { PageHeading } from '../../components/PageHeading'
 import { SectionHeading } from '../../components/SectionHeading'
 import { TimelineItem } from '../../components/TimelineItem'
 import { LinkButton } from '../../components/Button'
+import { createDb } from '../../db'
+import { workHistories, contactLinks as contactLinksTable } from '../../db/schema'
+import type { Env } from '../../server'
 
-const workHistory = [
-  {
-    period: '2025年10月 - 現在',
-    company: '株式会社パブリックテクノロジーズ',
-    role: 'フルスタックエンジニア',
-    skills: ['Next.js', 'tRPC', 'Prisma', 'TypeScript'],
-    description:
-      'AI行政というプロダクトでフルスタックエンジニアとして開発を担当。',
-    achievements: [
-      'Next.js + tRPC + Prisma を用いたフルスタック開発。RAGデータベース構築のためのファイルアップロード時のメタ情報入力負担を軽減するAI推論機能の実装を担当',
-    ],
-  },
-  {
-    period: '2023年1月 - 2025年9月',
-    company: 'アイリス株式会社',
-    role: 'フロントエンドエンジニア',
-    skills: ['React', 'TypeScript', 'Next.js', 'Storybook', 'Jest', 'Figma'],
-    description:
-      '咽頭画像を撮影するハードのカメラと問診を入力するWebアプリとAI判定を組み合わせた医療機器のフロントエンド開発を担当。',
-    achievements: [
-      'フロントエンドチームの品質担保について社内発表し、活動を広める',
-      'Next.js 勉強会を提案・開催。デイリーでチュートリアルを進め、毎週水曜日に共有する形式を構築',
-      'メディアサイト新規事業のプロトタイプを Next.js + Supabase で作成し社内に提案',
-      '外部 Web 問診サービス連携のプロトタイプを作成し、リリースまで推進',
-    ],
-  },
-  {
-    period: '2021年10月 - 2022年12月',
-    company: '合同会社ATE UNIVERSE',
-    role: 'Webコーダー',
-    skills: [
-      'HTML',
-      'CSS',
-      'JavaScript',
-      'WordPress',
-      'FLOCSS',
-      'React',
-      'TailwindCSS',
-    ],
-    description:
-      '前任者との入れ替わりで未経験から1人でスタート。Web事業の売り上げを落とすことなく、自走力を身につけた。',
-    achievements: [
-      'FLOCSS を用いた CSS 設計',
-      'Gulp で構築していた季節ごとの LP を React + TypeScript + TailwindCSS に移行し、コンポーネント化・再利用可能な形に改善',
-      'Next.js + microCMS で Headless CMS（Jamstack）を提案',
-    ],
-  },
-]
+export default createRoute(async (c) => {
+  const env = c.env as Env['Bindings']
+  const db = createDb(env.DB)
 
-const contactLinks = [
-  { label: 'Wantedly', href: 'https://www.wantedly.com/id/gens' },
-  { label: 'GitHub', href: 'https://github.com/GensIto' },
-  { label: 'X', href: 'https://x.com/g67715570' },
-]
+  // DBから職歴と連絡先リンクを取得
+  const workHistoryData = await db
+    .select()
+    .from(workHistories)
+    .orderBy(asc(workHistories.displayOrder))
+    .all()
 
-export default createRoute((c) => {
+  const contactLinksData = await db
+    .select()
+    .from(contactLinksTable)
+    .orderBy(asc(contactLinksTable.displayOrder))
+    .all()
   return c.render(
     <div class="max-w-[848px] mx-auto px-6 py-12">
       {/* Header */}
@@ -104,9 +68,9 @@ export default createRoute((c) => {
         </div>
 
         <div class="space-y-12">
-          {workHistory.map((item) => (
+          {workHistoryData.map((item) => (
             <TimelineItem
-              key={item.company}
+              key={item.id}
               period={item.period}
               company={item.company}
               role={item.role}
@@ -130,8 +94,8 @@ export default createRoute((c) => {
           </p>
 
           <div class="flex items-center justify-center gap-6">
-            {contactLinks.map((link) => (
-              <LinkButton key={link.label} href={link.href} target="_blank">
+            {contactLinksData.map((link) => (
+              <LinkButton key={link.id} href={link.href} target="_blank">
                 {link.label}
               </LinkButton>
             ))}

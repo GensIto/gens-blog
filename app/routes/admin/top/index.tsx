@@ -44,10 +44,18 @@ export default createRoute(async (c) => {
             記録一覧
           </p>
         </div>
-        <LinkButton href="/admin/new" target="_self">
-          <PlusIcon size={16} />
-          新規作成
-        </LinkButton>
+        <div class="flex items-center gap-4">
+          <a
+            href="/admin/resume"
+            class="inline-flex items-center gap-2 px-4 py-2 border border-stone-900 text-stone-900 font-['Noto_Sans_JP'] font-medium text-sm hover:bg-stone-100 transition-colors"
+          >
+            経歴管理
+          </a>
+          <LinkButton href="/admin/new" target="_self">
+            <PlusIcon size={16} />
+            新規作成
+          </LinkButton>
+        </div>
       </div>
 
       <BlogTable posts={blogsData.blogs} />
