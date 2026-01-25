@@ -1,57 +1,34 @@
-import { createRoute } from 'honox/factory'
-import { ArrowLeftIcon } from '../../../components/Icons'
-import BlogEditForm from '../../../islands/BlogEditForm'
+import { createRoute } from "honox/factory";
+import { ArrowLeftIcon } from "../../../components/Icons";
+import BlogEditForm from "../../../islands/BlogEditForm";
+import { getCookie, deleteCookie } from "hono/cookie";
+import { verify } from "hono/jwt";
+import type { Env } from "../../../server";
 
-// Mock function to get post data - replace with actual database query
-const getPostById = (id: string) => {
-  const posts: Record<
-    string,
-    {
-      id: string
-      title: string
-      slug: string
-      excerpt: string
-      content: string
-      status: 'draft' | 'published'
-      createdAt: string
-    }
-  > = {
-    '1': {
-      id: '1',
-      title: '実践 Clean Architecture',
-      slug: 'clean-architecture-in-practice',
-      excerpt: 'ドメイン駆動設計とクリーンアーキテクチャを組み合わせた実装パターンについて考察する。',
-      content: '## はじめに\n\nClean Architecture は...',
-      status: 'published',
-      createdAt: '2024-10-15',
-    },
-    '2': {
-      id: '2',
-      title: 'エッジコンピューティングの静謐',
-      slug: 'edge-computing-serenity',
-      excerpt:
-        'Cloudflare Workers と Hono を駆使し、新しい Web の形、レイテンシーを極限まで抑えた世界を探る旅。',
-      content: '## エッジの世界\n\n...',
-      status: 'published',
-      createdAt: '2024-10-10',
-    },
+export default createRoute(async (c) => {
+  const id = c.req.param("id");
+  if (!id) {
+    return c.notFound();
   }
-  return posts[id] || null
-}
 
-export default createRoute((c) => {
-  const id = c.req.param('id')
-  const post = getPostById(id)
+  const auth_token = getCookie(c, "auth_token");
+  if (!auth_token) {
+    return c.redirect("/admin");
+  }
 
-  if (!post) {
-    return c.notFound()
+  const env = c.env as Env["Bindings"];
+  try {
+    await verify(auth_token, env.JWT_SECRET, "HS256");
+  } catch {
+    deleteCookie(c, "auth_token", { path: "/" });
+    return c.redirect("/admin");
   }
 
   return c.render(
-    <div class="max-w-[848px] mx-auto px-6 py-12">
+    <div class='max-w-[848px] mx-auto px-6 py-12'>
       {/* Back Link */}
       <a
-        href="/admin"
+        href='/admin'
         class="inline-flex items-center gap-2 font-['Noto_Sans_JP'] text-sm text-stone-500 tracking-[2.1px] hover:text-stone-900 transition-colors mb-16"
       >
         <ArrowLeftIcon size={16} />
@@ -63,8 +40,7 @@ export default createRoute((c) => {
         記録編集
       </h1>
 
-      {/* Edit Form */}
-      <BlogEditForm initialData={post} />
-    </div>
-  )
-})
+      <BlogEditForm id={id} />
+    </div>,
+  );
+});
