@@ -1,33 +1,27 @@
+import { desc, eq } from 'drizzle-orm'
 import { createRoute } from 'honox/factory'
+import type { Env } from '../server'
+import { createDb, schema } from '../db'
 import { EnsoCircle } from '../components/EnsoCircle'
 import { SectionHeading } from '../components/SectionHeading'
 import { ArticleCard } from '../components/ArticleCard'
 import { ArrowRightIcon } from '../components/Icons'
 
-// Mock data - replace with actual database query
-const recentPosts = [
-  {
-    title: '実践 Clean Architecture',
-    excerpt: 'ドメイン駆動設計とクリーンアーキテクチャを組み合わせた実装パターンについて考察する。',
-    date: '2024-10-15',
-    slug: 'clean-architecture-in-practice',
-  },
-  {
-    title: 'エッジコンピューティングの静謐',
-    excerpt:
-      'Cloudflare Workers と Hono を駆使し、新しい Web の形、レイテンシーを極限まで抑えた世界を探る旅。',
-    date: '2024-10-10',
-    slug: 'edge-computing-serenity',
-  },
-  {
-    title: 'ドメイン駆動設計の本質',
-    excerpt: 'ユビキタス言語から始まる、ビジネスとコードの対話。複雑さを組み込む対話の術。',
-    date: '2024-09-28',
-    slug: 'essence-of-ddd',
-  },
-]
+export default createRoute(async (c) => {
+  const env = c.env as Env['Bindings']
+  const db = createDb(env.DB)
 
-export default createRoute((c) => {
+  const recentPosts = await db
+    .select({
+      title: schema.blogs.title,
+      excerpt: schema.blogs.excerpt,
+      slug: schema.blogs.slug,
+      date: schema.blogs.createdAt,
+    })
+    .from(schema.blogs)
+    .where(eq(schema.blogs.status, 'published'))
+    .orderBy(desc(schema.blogs.createdAt))
+    .limit(3)
   return c.render(
     <div class="max-w-[848px] mx-auto px-6 py-20">
       {/* Hero Section */}
@@ -68,7 +62,7 @@ export default createRoute((c) => {
             <ArticleCard
               key={post.slug}
               title={post.title}
-              excerpt={post.excerpt}
+              excerpt={post.excerpt ?? ''}
               date={post.date}
               slug={post.slug}
             />
