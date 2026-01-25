@@ -45,3 +45,35 @@ export const tags = sqliteTable('tags', {
     .notNull()
     .default(sql`(datetime('now'))`),
 })
+
+// 職歴テーブル
+export const workHistories = sqliteTable('work_histories', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  period: text('period').notNull(), // 例: "2025年10月 - 現在"
+  company: text('company').notNull(),
+  role: text('role').notNull(),
+  skills: text('skills', { mode: 'json' }).$type<string[]>().notNull(), // JSONとして保存
+  description: text('description').notNull(),
+  achievements: text('achievements', { mode: 'json' }).$type<string[]>().notNull(), // JSONとして保存
+  displayOrder: integer('display_order').notNull().default(0),
+  createdAt: text('createdAt')
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text('updatedAt')
+    .notNull()
+    .default(sql`(datetime('now'))`),
+})
+
+// 連絡先リンクテーブル
+export const contactLinks = sqliteTable('contact_links', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  label: text('label').notNull(), // 例: "GitHub"
+  href: text('href').notNull(),
+  displayOrder: integer('display_order').notNull().default(0),
+  createdAt: text('createdAt')
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text('updatedAt')
+    .notNull()
+    .default(sql`(datetime('now'))`),
+})

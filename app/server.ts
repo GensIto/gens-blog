@@ -3,6 +3,10 @@ import { createApp } from 'honox/server'
 import type { JWTPayload } from 'hono/utils/jwt/types'
 import { authController } from './server/auth/controllers'
 import { blogController } from './server/blogs/controllers'
+import {
+  workHistoryController,
+  contactLinkController,
+} from './server/resume/controllers'
 import type { Database } from './db'
 import type { Ai } from '@cloudflare/workers-types/experimental'
 
@@ -22,6 +26,8 @@ const app = createApp<Env>()
   .basePath('/api')
   .route('/auth', authController)
   .route('/blogs', blogController)
+  .route('/work-histories', workHistoryController)
+  .route('/contact-links', contactLinkController)
 
 showRoutes(app)
 
