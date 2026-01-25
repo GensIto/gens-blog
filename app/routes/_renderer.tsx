@@ -10,10 +10,17 @@ export default jsxRenderer(({ children }) => {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>ZEN - 静謐なる思考</title>
-        <meta name="description" content="ソフトウェアエンジニアリングの深淵を探る。コードと思想の記録。" />
+        <meta
+          name="description"
+          content="ソフトウェアエンジニアリングの深淵を探る。コードと思想の記録。"
+        />
         <link rel="icon" href="/favicon.ico" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin=""
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Sans+JP:wght@400;500&family=Noto+Serif+JP:wght@400;500&family=Inter:wght@400;500&display=swap"
           rel="stylesheet"

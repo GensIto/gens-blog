@@ -5,7 +5,10 @@ type PhilosophyItemProps = {
   description: string
 }
 
-export const PhilosophyItem: FC<PhilosophyItemProps> = ({ title, description }) => {
+export const PhilosophyItem: FC<PhilosophyItemProps> = ({
+  title,
+  description,
+}) => {
   return (
     <div class="border-l-2 border-[#7a9a7a] pl-6 py-1">
       <h3 class="font-['Noto_Serif_JP'] font-medium text-lg text-stone-900 leading-7">

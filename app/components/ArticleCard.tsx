@@ -7,7 +7,12 @@ type ArticleCardProps = {
   slug: string
 }
 
-export const ArticleCard: FC<ArticleCardProps> = ({ title, excerpt, date, slug }) => {
+export const ArticleCard: FC<ArticleCardProps> = ({
+  title,
+  excerpt,
+  date,
+  slug,
+}) => {
   return (
     <article class="border-b border-stone-200 pb-8">
       <time class="font-['Noto_Sans_JP'] text-sm text-stone-400 tracking-[0.7px]">

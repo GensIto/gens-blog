@@ -13,7 +13,13 @@ type SelectProps = {
   required?: boolean
 }
 
-export const Select: FC<SelectProps> = ({ label, name, options, value, required = false }) => {
+export const Select: FC<SelectProps> = ({
+  label,
+  name,
+  options,
+  value,
+  required = false,
+}) => {
   return (
     <div class="flex flex-col gap-3">
       <label
@@ -29,7 +35,11 @@ export const Select: FC<SelectProps> = ({ label, name, options, value, required 
         class="w-full px-4 py-3 bg-white border border-stone-200 font-['Noto_Sans_JP'] text-base text-stone-900 focus:outline-none focus:border-[#7a9a7a] transition-colors appearance-none cursor-pointer"
       >
         {options.map((option) => (
-          <option key={option.value} value={option.value} selected={option.value === value}>
+          <option
+            key={option.value}
+            value={option.value}
+            selected={option.value === value}
+          >
             {option.label}
           </option>
         ))}

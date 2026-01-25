@@ -1,0 +1,9 @@
+dist/
+node_modules/
+.wrangler/
+.hono/
+drizzle/
+bun.lock
+*.log
+worker-configuration.d.ts
+public/

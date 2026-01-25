@@ -5,7 +5,9 @@
 ## 見出し
 
 ### レベル3の見出し
+
 #### レベル4の見出し
+
 ##### レベル5の見出し
 
 ## テキスト装飾
@@ -87,8 +89,8 @@ interface User {
 
 const user: User = {
   id: 1,
-  name: "太郎",
-  email: "taro@example.com"
+  name: '太郎',
+  email: 'taro@example.com',
 }
 ```
 
@@ -105,19 +107,19 @@ const user: User = {
 
 ## テーブル
 
-| 名前 | 年齢 | 職業 |
-|------|------|------|
-| 太郎 | 25 | エンジニア |
-| 花子 | 30 | デザイナー |
-| 次郎 | 28 | プロダクトマネージャー |
+| 名前 | 年齢 | 職業                   |
+| ---- | ---- | ---------------------- |
+| 太郎 | 25   | エンジニア             |
+| 花子 | 30   | デザイナー             |
+| 次郎 | 28   | プロダクトマネージャー |
 
 ### 整列オプション
 
 | 左揃え | 中央揃え | 右揃え |
-|:-------|:--------:|-------:|
-| Left   | Center   | Right  |
-| A      | B        | C      |
-| 1      | 2        | 3      |
+| :----- | :------: | -----: |
+| Left   |  Center  |  Right |
+| A      |    B     |      C |
+| 1      |    2     |      3 |
 
 ## 画像
 
@@ -141,14 +143,14 @@ import { useState, useEffect } from 'react'
 function useWindowSize() {
   const [size, setSize] = useState({
     width: window.innerWidth,
-    height: window.innerHeight
+    height: window.innerHeight,
   })
 
   useEffect(() => {
     function handleResize() {
       setSize({
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       })
     }
 
@@ -171,9 +173,11 @@ function useWindowSize() {
 重要なポイント：
 
 - **パフォーマンス**: 最適化を常に意識する
+
   > 「早すぎる最適化は諸悪の根源である」 - Donald Knuth
 
 - **可読性**: コードは読みやすく保つ
+
   > 「コードは書くよりも読まれることの方が多い」
 
 - **テスト**: 必ずテストを書く

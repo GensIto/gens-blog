@@ -18,7 +18,9 @@ export default createRoute(async (c) => {
       slug: schema.blogs.slug,
     })
     .from(schema.blogs)
-    .where(and(eq(schema.blogs.slug, slug), eq(schema.blogs.status, 'published')))
+    .where(
+      and(eq(schema.blogs.slug, slug), eq(schema.blogs.status, 'published'))
+    )
     .limit(1)
 
   if (!post) {

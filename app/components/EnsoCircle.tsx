@@ -5,7 +5,10 @@ type EnsoCircleProps = {
   className?: string
 }
 
-export const EnsoCircle: FC<EnsoCircleProps> = ({ size = 32, className = '' }) => {
+export const EnsoCircle: FC<EnsoCircleProps> = ({
+  size = 32,
+  className = '',
+}) => {
   return (
     <svg
       width={size}

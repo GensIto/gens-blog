@@ -12,7 +12,9 @@ export const SectionHeading: FC<SectionHeadingProps> = ({
   withUnderline = true,
 }) => {
   return (
-    <div class={`flex flex-col gap-5 ${centered ? 'items-center' : 'items-start'}`}>
+    <div
+      class={`flex flex-col gap-5 ${centered ? 'items-center' : 'items-start'}`}
+    >
       <h2 class="font-['Noto_Serif_JP'] font-medium text-2xl text-stone-900 leading-8">
         {title}
       </h2>

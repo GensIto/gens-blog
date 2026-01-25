@@ -1,4 +1,4 @@
-import type { FC } from 'hono/jsx'
+import type { Child, FC } from 'hono/jsx'
 import { useEffect } from 'hono/jsx'
 import { XIcon } from './Icons'
 
@@ -6,7 +6,7 @@ type ModalProps = {
   isOpen: boolean
   onClose: () => void
   title?: string
-  children: any
+  children: Child
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 }
 
@@ -85,9 +85,7 @@ export const Modal: FC<ModalProps> = ({
         </div>
 
         {/* Content */}
-        <div class="overflow-y-auto p-6 md:p-8">
-          {children}
-        </div>
+        <div class="overflow-y-auto p-6 md:p-8">{children}</div>
       </div>
     </div>
   )

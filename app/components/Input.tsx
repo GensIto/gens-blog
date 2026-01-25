@@ -3,7 +3,7 @@ import type { FC } from 'hono/jsx'
 type InputProps = {
   label: string
   name: string
-  type?: 'text' | 'date' | 'email' | 'password' 
+  type?: 'text' | 'date' | 'email' | 'password'
   placeholder?: string
   value?: string
   required?: boolean

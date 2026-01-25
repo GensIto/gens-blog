@@ -17,7 +17,10 @@ export const Header: FC = () => {
     <header class="border-b border-stone-200 px-6 py-3 md:px-[165.5px]">
       <nav class="flex items-center justify-between h-8">
         {/* Logo */}
-        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <a
+          href="/"
+          class="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
           <EnsoCircle size={32} />
           <span class="font-['Cormorant_Garamond'] text-lg text-stone-900 tracking-[4.5px] opacity-80">
             ZEN

@@ -5,7 +5,10 @@ type IconProps = {
   class?: string
 }
 
-export const ArrowLeftIcon: FC<IconProps> = ({ size = 16, class: className = '' }) => (
+export const ArrowLeftIcon: FC<IconProps> = ({
+  size = 16,
+  class: className = '',
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -23,7 +26,10 @@ export const ArrowLeftIcon: FC<IconProps> = ({ size = 16, class: className = '' 
   </svg>
 )
 
-export const ArrowRightIcon: FC<IconProps> = ({ size = 16, class: className = '' }) => (
+export const ArrowRightIcon: FC<IconProps> = ({
+  size = 16,
+  class: className = '',
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -41,7 +47,10 @@ export const ArrowRightIcon: FC<IconProps> = ({ size = 16, class: className = ''
   </svg>
 )
 
-export const PlusIcon: FC<IconProps> = ({ size = 16, class: className = '' }) => (
+export const PlusIcon: FC<IconProps> = ({
+  size = 16,
+  class: className = '',
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -59,7 +68,10 @@ export const PlusIcon: FC<IconProps> = ({ size = 16, class: className = '' }) =>
   </svg>
 )
 
-export const MailIcon: FC<IconProps> = ({ size = 16, class: className = '' }) => (
+export const MailIcon: FC<IconProps> = ({
+  size = 16,
+  class: className = '',
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}

@@ -13,15 +13,15 @@ const workHistory = [
     skills: ['Next.js', 'tRPC', 'Prisma', 'TypeScript'],
     description:
       'AI行政というプロダクトでフルスタックエンジニアとして開発を担当。',
-      achievements: [
-        'Next.js + tRPC + Prisma を用いたフルスタック開発。RAGデータベース構築のためのファイルアップロード時のメタ情報入力負担を軽減するAI推論機能の実装を担当',
-      ],
+    achievements: [
+      'Next.js + tRPC + Prisma を用いたフルスタック開発。RAGデータベース構築のためのファイルアップロード時のメタ情報入力負担を軽減するAI推論機能の実装を担当',
+    ],
   },
   {
     period: '2023年1月 - 2025年9月',
     company: 'アイリス株式会社',
     role: 'フロントエンドエンジニア',
-    skills: ['React', 'TypeScript', 'Next.js', 'Storybook', 'Jest', "Figma"],
+    skills: ['React', 'TypeScript', 'Next.js', 'Storybook', 'Jest', 'Figma'],
     description:
       '咽頭画像を撮影するハードのカメラと問診を入力するWebアプリとAI判定を組み合わせた医療機器のフロントエンド開発を担当。',
     achievements: [
@@ -35,7 +35,15 @@ const workHistory = [
     period: '2021年10月 - 2022年12月',
     company: '合同会社ATE UNIVERSE',
     role: 'Webコーダー',
-    skills: ['HTML', 'CSS', 'JavaScript', 'WordPress', 'FLOCSS', "React", "TailwindCSS"],
+    skills: [
+      'HTML',
+      'CSS',
+      'JavaScript',
+      'WordPress',
+      'FLOCSS',
+      'React',
+      'TailwindCSS',
+    ],
     description:
       '前任者との入れ替わりで未経験から1人でスタート。Web事業の売り上げを落とすことなく、自走力を身につけた。',
     achievements: [
@@ -78,7 +86,8 @@ export default createRoute((c) => {
           </p>
 
           <p class="font-['Noto_Serif_JP'] text-base text-stone-900 leading-8 tracking-[0.32px] text-left">
-            Web コーダーからスタートし、現在はソフトウェアエンジニアとして、React、TypeScript
+            Web
+            コーダーからスタートし、現在はソフトウェアエンジニアとして、React、TypeScript
             を軸に、開発しています。
           </p>
 
@@ -122,7 +131,7 @@ export default createRoute((c) => {
 
           <div class="flex items-center justify-center gap-6">
             {contactLinks.map((link) => (
-              <LinkButton key={link.label} href={link.href} target='_blank'>
+              <LinkButton key={link.label} href={link.href} target="_blank">
                 {link.label}
               </LinkButton>
             ))}

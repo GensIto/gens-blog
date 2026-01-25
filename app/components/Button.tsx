@@ -42,7 +42,11 @@ export const Button: FC<ButtonProps> = ({
   disabled = false,
 }) => {
   return (
-    <button type={type} class={getButtonClasses(variant, className)} disabled={disabled}>
+    <button
+      type={type}
+      class={getButtonClasses(variant, className)}
+      disabled={disabled}
+    >
       {children}
     </button>
   )

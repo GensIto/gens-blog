@@ -6,9 +6,15 @@ type PageHeadingProps = {
   centered?: boolean
 }
 
-export const PageHeading: FC<PageHeadingProps> = ({ title, subtitle, centered = false }) => {
+export const PageHeading: FC<PageHeadingProps> = ({
+  title,
+  subtitle,
+  centered = false,
+}) => {
   return (
-    <div class={`flex flex-col gap-3 ${centered ? 'items-center text-center' : 'items-start'}`}>
+    <div
+      class={`flex flex-col gap-3 ${centered ? 'items-center text-center' : 'items-start'}`}
+    >
       <h1 class="font-['Noto_Serif_JP'] font-medium text-3xl text-stone-900 leading-9">
         {title}
       </h1>
