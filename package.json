@@ -25,6 +25,7 @@
     "hono": "^4.11.4",
     "honox": "0.1.52",
     "marked": "^17.0.1",
+    "shiki": "^3.21.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
