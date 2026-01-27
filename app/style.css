@@ -11,7 +11,8 @@
 }
 
 .shiki code {
-  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-family:
+    'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
 }
 
 /* Override prose styles for Shiki code blocks */
