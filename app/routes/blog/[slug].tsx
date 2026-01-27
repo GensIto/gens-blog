@@ -1,9 +1,9 @@
 import { and, eq } from 'drizzle-orm'
 import { createRoute } from 'honox/factory'
-import { marked } from 'marked'
 import type { Env } from '../../server'
 import { createDb, schema } from '../../db'
 import { ArrowLeftIcon } from '../../components/Icons'
+import { parseMarkdownWithShiki } from '../../lib/markdown'
 
 export default createRoute(async (c) => {
   const slug = c.req.param('slug') as string
@@ -27,7 +27,7 @@ export default createRoute(async (c) => {
     return c.notFound()
   }
 
-  const htmlContent = await marked.parse(post.content)
+  const htmlContent = await parseMarkdownWithShiki(post.content)
 
   return c.render(
     <div class="max-w-[848px] mx-auto px-6 py-12">

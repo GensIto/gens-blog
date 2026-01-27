@@ -1,2 +1,30 @@
 @import 'tailwindcss' source('../app');
 @plugin '@tailwindcss/typography';
+
+/* Shiki code block styles */
+.shiki {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.shiki code {
+  font-family:
+    'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+}
+
+/* Override prose styles for Shiki code blocks */
+.prose pre.shiki {
+  background-color: var(--shiki-bg, #24292e) !important;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+.prose pre.shiki code {
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.875rem;
+  color: inherit;
+}

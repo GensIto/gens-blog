@@ -159,9 +159,12 @@ export default createRoute(async (c) => {
 export const blogController = createApp<Env>()
   .use(dbMiddleware)
   .get('/:id', async (c) => {
-    const db = c.get('db')  // Database instance from middleware
+    const db = c.get('db') // Database instance from middleware
     const id = c.req.param('id')
-    const result = await db.select().from(blogs).where(eq(blogs.id, Number(id)))
+    const result = await db
+      .select()
+      .from(blogs)
+      .where(eq(blogs.id, Number(id)))
     // ...
   })
 ```
@@ -176,7 +179,7 @@ The auth system uses JWT tokens stored in httpOnly cookies:
 export const blogController = createApp<Env>()
   .use(dbMiddleware)
   .post('/', authMiddleware, async (c) => {
-    const user = c.get('user')  // JWT payload if authenticated
+    const user = c.get('user') // JWT payload if authenticated
     // ... protected route logic
   })
 ```
